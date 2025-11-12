@@ -177,7 +177,7 @@ POST /token
 **Request Body:**
 ```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": {refreshToken}
 }
 ```
 
@@ -283,9 +283,7 @@ Authorization: Bearer <access_token>
     "mainGoal": "Weight Loss",
     "weightGoal": 65.0,
     "activityLevel": "Moderate",
-    "allergies": {
-      "allergy": ["Peanuts", "Shellfish"]
-    }
+    "allergies": ["Peanuts", "Shellfish"]
   }
 }
 ```
