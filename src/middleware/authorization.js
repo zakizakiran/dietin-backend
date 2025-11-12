@@ -31,7 +31,7 @@ const authorizeToken = (req, res, next) => {
                 status: 403,
                 message: "access token has expired or is invalid",
             });
-        req.user = user;
+        req.user = userIsExist;
         next();
     });
 };

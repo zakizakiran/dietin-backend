@@ -12,11 +12,13 @@ app.use(express.json());
 
 import registerRoute from './routes/registerRoute.js';
 import loginRoute from './routes/loginRoute.js';
+import onboardRoute from './routes/onboardRoute.js';
 
 app.use(express.json());
 app.use(logger);
 app.use('/register', registerRoute);
 app.use('/login', loginRoute);
+app.use('/onboard', onboardRoute);
 
 function logger(req, res, next) {
     console.log(`[${new Date().toString()}] - ${req.method} ${req.path}`);
