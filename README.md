@@ -1,11 +1,5 @@
 # Dietin Backend
 
-Backend API untuk aplikasi Dietin - aplikasi manajemen diet dan kesehatan.
-
-## 📋 Deskripsi
-
-Dietin Backend adalah REST API yang dibangun dengan Node.js, Express.js, dan Prisma ORM untuk mengelola data user, autentikasi, onboarding, dan profil pengguna dalam aplikasi Dietin.
-
 ## 🛠️ Tech Stack
 
 - **Runtime**: Node.js
