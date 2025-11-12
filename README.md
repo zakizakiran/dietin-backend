@@ -459,27 +459,4 @@ npx prisma generate
 | ACCESS_TOKEN_SECRET | Secret key untuk access token | your_secret_key_here |
 | REFRESH_TOKEN_SECRET | Secret key untuk refresh token | your_refresh_secret_here |
 
-## 🤝 Contributing
-
-1. Fork repository ini
-2. Buat branch baru (`git checkout -b feature/amazing-feature`)
-3. Commit perubahan (`git commit -m 'Add some amazing feature'`)
-4. Push ke branch (`git push origin feature/amazing-feature`)
-5. Buat Pull Request
-
-## 📄 License
-
-ISC
-
-## 👨‍💻 Author
-
-**Zaki Zakiran**
-- GitHub: [@zakizakiran](https://github.com/zakizakiran)
-
-## 📞 Support
-
-Jika Anda mengalami masalah atau memiliki pertanyaan, silakan buat issue di repository ini.
-
----
-
 **Happy Coding! 🚀**
