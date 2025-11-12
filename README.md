@@ -250,7 +250,8 @@ Authorization: Bearer <access_token>
     "weight": 70.0,
     "mainGoal": "Weight Loss",
     "weightGoal": 65.0,
-    "activityLevel": "Moderate"
+    "activityLevel": "Moderate",
+    "allergies": ["Peanuts", "Shellfish"]
   }
 }
 ```
