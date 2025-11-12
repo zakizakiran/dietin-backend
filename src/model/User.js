@@ -26,6 +26,15 @@ const findUserByEmail = async (email) => {
     });
 };
 
+const findUserWithAllergies = async (email) => {
+    return await prisma.user.findUnique({
+        where: { email: email },
+        include: {
+            allergies: true  // ✅ Include relasi allergies
+        }
+    });
+};
+
 const addRefreshToken = async (email, refreshToken) => {
     return await prisma.user.update({
         where: { email: email },
@@ -66,6 +75,7 @@ const getAllergiesByUserId = async (userId) => {
 export {
     createAccount,
     findUserByEmail,
+    findUserWithAllergies,
     addRefreshToken,
     findRefreshToken,
     deleteRefreshToken,

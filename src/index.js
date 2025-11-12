@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { refreshTokenHandler } from './middleware/authorization.js';
+import { refreshTokenHandler, authorizeToken, logoutHandler } from './middleware/authorization.js';
 import registerRoute from './routes/registerRoute.js';
 import loginRoute from './routes/loginRoute.js';
 import onboardRoute from './routes/onboardRoute.js';
-import { logoutHandler } from './middleware/authorization.js';
+import userRoute from './routes/userRoute.js';
 
 dotenv.config();
 
@@ -21,11 +21,12 @@ app.use(logger);
 app.use('/register', registerRoute);
 app.use('/login', loginRoute);
 app.use('/onboard', onboardRoute);
+app.use('/user', authorizeToken, userRoute);
 app.delete('/logout', async (req, res) => {
     await logoutHandler(req, res);
 });
 
-function logger(req, next) {
+function logger(req, res, next) {
     console.log(`[${new Date().toString()}] - ${req.method} ${req.path}`);
     next();
 }
