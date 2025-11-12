@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,20 +13,22 @@ enum Gender {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  gender    Gender?
-  birthDate DateTime?
-  height    Float?  
-  weight    Float?  
-  mainGoal  String?
-  weightGoal Float?
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password      String
+  name          String?
+  gender        Gender?
+  birthDate     DateTime?
+  height        Float?
+  weight        Float?
+  mainGoal      String?
+  weightGoal    Float?
   activityLevel String?
-  allergies Allergy[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  allergies     Allergy[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  refreshToken  String?   @db.VarChar(255)
+  accessToken   String?   @db.VarChar(255)
 }
 
 model Allergy {
@@ -37,5 +38,6 @@ model Allergy {
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@unique([userId])
 }
