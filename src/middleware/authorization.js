@@ -119,28 +119,52 @@ const createToken = (payload) => {
 
 const logoutHandler = async (req, res) => {
     const refreshToken = req.body.token;
-    refreshToken ?? null;
-    if (refreshToken == null) {
-        return response(res, { status: 400, message: "no token found in request body" });
+
+    if (!refreshToken) {
+        return response(res, {
+            status: 400,
+            message: "no token found in request body"
+        });
     }
-    const user = (await findRefreshToken(refreshToken)) ?? "";
-    console.log(user);
+
+    let decoded;
+
     try {
-        jwt.verify(
-            user.refreshToken,
-            process.env.REFRESH_TOKEN_SECRET,
-            async (err, decoded) => {
-                if (err) {
-                    response(res, { status: 403, message: "invalid refresh token" });
-                } else {
-                    await deleteRefreshToken(decoded.id);
-                    response(res, { status: 200, message: "success logout" });
-                }
-            }
-        );
+        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     } catch (err) {
-        console.log(err);
-        response(res, { status: 500, message: "internal server error" });
+        return response(res, {
+            status: 403,
+            message: "invalid or expired refresh token"
+        });
+    }
+
+    const user = await findRefreshToken(refreshToken);
+    if (!user) {
+        return response(res, {
+            status: 403,
+            message: "token not found or user already logged out"
+        });
+    }
+
+    if (decoded.email !== user.email) {
+        return response(res, {
+            status: 403,
+            message: "token mismatch"
+        });
+    }
+
+    try {
+        await deleteRefreshToken(user.id);
+        return response(res, {
+            status: 200,
+            message: "success logout"
+        });
+    } catch (err) {
+        console.error("Logout error:", err);
+        return response(res, {
+            status: 500,
+            message: "failed to logout"
+        });
     }
 };
 
