@@ -1,5 +1,18 @@
 # Dietin Backend
 
+Backend API untuk aplikasi Dietin - aplikasi manajemen diet dan kesehatan.
+
+## ✨ Features
+
+- 🔐 **Authentication & Authorization** - JWT-based authentication dengan refresh token
+- 👤 **User Management** - User registration, login, profile management
+- 📋 **Onboarding System** - Complete user health profile setup
+- 🍕 **Food Database** - Comprehensive food database dengan nutrition facts, ingredients, dan cooking steps
+- 📊 **Food Logging** - Track makanan yang dikonsumsi per waktu makan (Breakfast, Lunch, Dinner, Snack)
+- 🔄 **Multi-food Support** - Log multiple foods dalam satu waktu makan
+- 📈 **Nutrition Tracking** - Automatic nutrition calculation dari foods yang di-log
+- 🛡️ **Data Security** - Protected endpoints dengan JWT authorization
+
 ## 🛠️ Tech Stack
 
 - **Runtime**: Node.js
@@ -97,6 +110,27 @@ Server akan berjalan di `http://localhost:3000` (atau port yang Anda tentukan di
 ```
 http://localhost:3000
 ```
+
+### Endpoints Overview
+
+| Category | Endpoint | Method | Auth Required | Description |
+|----------|----------|--------|---------------|-------------|
+| **Authentication** | `/register` | POST | ❌ | Register new user |
+| | `/login` | POST | ❌ | User login |
+| | `/token` | POST | ❌ | Refresh access token |
+| | `/logout` | DELETE | ✅ | User logout |
+| **Onboarding** | `/onboard` | POST | ✅ | Complete user onboarding |
+| **User Profile** | `/user` | GET | ✅ | Get user profile |
+| | `/user` | PUT | ✅ | Update user profile |
+| **Food** | `/foods` | GET | ❌ | Get all foods |
+| | `/foods/:id` | GET | ❌ | Get food by ID |
+| | `/foods` | POST | ❌ | Create new food |
+| | `/foods/:id` | PUT | ❌ | Update food |
+| | `/foods/:id` | DELETE | ❌ | Delete food |
+| **Food Log** | `/food-logs` | POST | ✅ | Add food consumption log |
+| | `/food-logs/date` | GET | ✅ | Get food logs by date |
+| | `/food-logs` | GET | ✅ | Get all food logs |
+| | `/food-logs/:id` | DELETE | ✅ | Delete food log |
 
 ### Endpoints
 
@@ -296,6 +330,68 @@ Authorization: Bearer <access_token>
       "activityLevel": "Moderate",
       "allergies": ["Peanuts", "Shellfish"]
     }
+  }
+}
+```
+
+##### Update User Profile
+
+```http
+PUT /user
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+  "name": "John Doe Updated",
+  "birthDate": "1990-01-01",
+  "height": 172.0,
+  "weight": 68.0,
+  "gender": "Male",
+  "mainGoal": "Muscle Gain",
+  "weightGoal": 75.0,
+  "activityLevel": "Active",
+  "allergies": ["Peanuts", "Dairy"]
+}
+```
+
+**Note:** Semua field bersifat opsional. Kirim hanya field yang ingin diupdate.
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "User profile updated successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "email": "john@example.com",
+      "name": "John Doe Updated",
+      "gender": "Male",
+      "birthDate": "1990-01-01T00:00:00.000Z",
+      "height": 172.0,
+      "weight": 68.0,
+      "mainGoal": "Muscle Gain",
+      "weightGoal": 75.0,
+      "activityLevel": "Active",
+      "allergies": ["Peanuts", "Dairy"]
+    }
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "User not found",
+  "response": {
+    "payload": null
   }
 }
 ```
@@ -597,6 +693,268 @@ DELETE /foods/:id
 }
 ```
 
+#### 5. Food Log Management
+
+##### Add Food Log
+
+Menyimpan makanan yang telah dikonsumsi untuk waktu tertentu (Breakfast, Lunch, Dinner, Snack).
+
+```http
+POST /food-logs
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+  "date": "2025-11-26",
+  "mealType": "Breakfast",
+  "foods": [
+    {
+      "foodId": 1,
+      "servings": 1
+    },
+    {
+      "foodId": 2,
+      "servings": 0.5
+    }
+  ]
+}
+```
+
+**Field Description:**
+- `date` (optional): Tanggal konsumsi (YYYY-MM-DD). Jika tidak diisi, akan menggunakan tanggal sekarang.
+- `mealType` (required): Jenis waktu makan. Valid values: `Breakfast`, `Lunch`, `Dinner`, `Snack`
+- `foods` (required): Array of food objects
+  - `foodId`: ID makanan dari tabel Food
+  - `servings` (optional): Jumlah porsi yang dikonsumsi. Default = 1
+
+**Response Success (201):**
+```json
+{
+  "status": 201,
+  "message": "Food log added successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "date": "2025-11-26T00:00:00.000Z",
+      "mealType": "Breakfast",
+      "foods": [
+        {
+          "id": 1,
+          "name": "Pizza Margherita",
+          "description": "Pizza klasik dengan keju mozzarella",
+          "imageUrl": "https://example.com/pizza.jpg",
+          "servings": 1,
+          "nutritionFacts": [
+            {"name": "Kalori", "value": "285 kkal"},
+            {"name": "Protein", "value": "12 g"}
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Nasi Goreng",
+          "description": "Nasi goreng spesial",
+          "imageUrl": "https://example.com/nasigoreng.jpg",
+          "servings": 0.5,
+          "nutritionFacts": [
+            {"name": "Kalori", "value": "450 kkal"},
+            {"name": "Protein", "value": "15 g"}
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Meal type is required (Breakfast, Lunch, Dinner, or Snack)",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "One or more food IDs not found",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+##### Get Food Logs by Date
+
+Mengambil semua food log untuk tanggal tertentu.
+
+```http
+GET /food-logs/date?date=2025-11-26
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Query Parameters:**
+- `date` (required): Tanggal dalam format YYYY-MM-DD
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food logs retrieved successfully",
+  "response": {
+    "payload": [
+      {
+        "id": 1,
+        "date": "2025-11-26T07:00:00.000Z",
+        "mealType": "Breakfast",
+        "foods": [
+          {
+            "id": 1,
+            "name": "Pizza Margherita",
+            "description": "Pizza klasik dengan keju mozzarella",
+            "imageUrl": "https://example.com/pizza.jpg",
+            "servings": 1,
+            "nutritionFacts": [
+              {"name": "Kalori", "value": "285 kkal"},
+              {"name": "Protein", "value": "12 g"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "date": "2025-11-26T12:00:00.000Z",
+        "mealType": "Lunch",
+        "foods": [
+          {
+            "id": 3,
+            "name": "Spaghetti Carbonara",
+            "description": "Pasta dengan saus carbonara",
+            "imageUrl": "https://example.com/spaghetti.jpg",
+            "servings": 1,
+            "nutritionFacts": [
+              {"name": "Kalori", "value": "520 kkal"},
+              {"name": "Protein", "value": "20 g"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Date parameter is required (YYYY-MM-DD)",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+##### Get All Food Logs
+
+Mengambil semua food log user (default 30 terakhir).
+
+```http
+GET /food-logs?limit=30
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Query Parameters:**
+- `limit` (optional): Jumlah maksimal record yang diambil. Default = 30
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food logs retrieved successfully",
+  "response": {
+    "payload": [
+      {
+        "id": 1,
+        "date": "2025-11-26T07:00:00.000Z",
+        "mealType": "Breakfast",
+        "foods": [...]
+      },
+      {
+        "id": 2,
+        "date": "2025-11-25T12:00:00.000Z",
+        "mealType": "Lunch",
+        "foods": [...]
+      }
+    ]
+  }
+}
+```
+
+##### Delete Food Log
+
+Menghapus food log berdasarkan ID.
+
+```http
+DELETE /food-logs/:id
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food log deleted successfully",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Food log not found",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (403):**
+```json
+{
+  "status": 403,
+  "message": "Unauthorized to delete this food log",
+  "response": {
+    "payload": null
+  }
+}
+```
+
 ### Authentication
 
 Sebagian besar endpoint memerlukan autentikasi menggunakan JWT. Sertakan token di header:
@@ -697,6 +1055,28 @@ Authorization: Bearer <your_access_token>
 | createdAt | DateTime | Waktu pembuatan |
 | updatedAt | DateTime | Waktu update terakhir |
 
+### FoodLog Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| userId | Int | Foreign key ke User |
+| date | DateTime | Tanggal konsumsi makanan |
+| mealType | Enum | Jenis waktu makan (Breakfast, Lunch, Dinner, Snack) |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
+### FoodLogItem Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| foodLogId | Int | Foreign key ke FoodLog |
+| foodId | Int | Foreign key ke Food |
+| servings | Float | Jumlah porsi yang dikonsumsi |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
 ## 🔧 Database Management
 
 ### Membuka Prisma Studio
@@ -738,7 +1118,8 @@ dietin-backend/
 │   │   ├── registerController.js
 │   │   ├── onboardController.js
 │   │   ├── userController.js
-│   │   └── foodController.js
+│   │   ├── foodController.js
+│   │   └── foodLogController.js
 │   ├── middleware/            # Middleware functions
 │   │   └── authorization.js
 │   ├── model/                 # Data models
@@ -748,7 +1129,8 @@ dietin-backend/
 │   │   ├── registerRoute.js
 │   │   ├── onboardRoute.js
 │   │   ├── userRoute.js
-│   │   └── foodRoute.js
+│   │   ├── foodRoute.js
+│   │   └── foodLogRoute.js
 │   ├── index.js               # Application entry point
 │   └── responseScheme.js      # Response formatter
 ├── .env                       # Environment variables
@@ -789,6 +1171,17 @@ curl -X POST http://localhost:3000/login \
 # Get User Profile
 curl -X GET http://localhost:3000/user \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Update User Profile
+curl -X PUT http://localhost:3000/user \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe Updated",
+    "height": 172.0,
+    "weight": 68.0,
+    "mainGoal": "Muscle Gain"
+  }'
 
 # Get All Foods
 curl -X GET http://localhost:3000/foods
@@ -835,6 +1228,79 @@ curl -X PUT http://localhost:3000/foods/1 \
 
 # Delete Food
 curl -X DELETE http://localhost:3000/foods/1
+
+# Add Food Log
+curl -X POST http://localhost:3000/food-logs \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-11-26",
+    "mealType": "Breakfast",
+    "foods": [
+      {"foodId": 1, "servings": 1},
+      {"foodId": 2, "servings": 0.5}
+    ]
+  }'
+
+# Get Food Logs by Date
+curl -X GET "http://localhost:3000/food-logs/date?date=2025-11-26" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get All Food Logs
+curl -X GET "http://localhost:3000/food-logs?limit=30" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Delete Food Log
+curl -X DELETE http://localhost:3000/food-logs/1 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Food Log Use Cases
+
+#### Use Case 1: Log Breakfast with Multiple Foods
+```bash
+# User makan breakfast dengan Pizza dan Jus Jeruk
+POST /food-logs
+{
+  "date": "2025-11-26",
+  "mealType": "Breakfast",
+  "foods": [
+    {"foodId": 1, "servings": 1},      // Pizza 1 porsi
+    {"foodId": 5, "servings": 2}       // Jus Jeruk 2 gelas
+  ]
+}
+```
+
+#### Use Case 2: Log Half Portion
+```bash
+# User hanya makan setengah porsi
+POST /food-logs
+{
+  "mealType": "Dinner",
+  "foods": [
+    {"foodId": 3, "servings": 0.5}     // Setengah porsi Nasi Goreng
+  ]
+}
+```
+
+#### Use Case 3: Track Daily Intake
+```bash
+# Get all meals for today
+GET /food-logs/date?date=2025-11-26
+
+# Response akan menampilkan:
+# - Breakfast: Pizza (285 kkal) + Jus Jeruk (200 kkal)
+# - Lunch: Spaghetti (520 kkal)
+# - Dinner: Nasi Goreng 0.5 porsi (225 kkal)
+# Total: ~1230 kkal
+```
+
+#### Use Case 4: View Last 7 Days History
+```bash
+# Get recent food logs
+GET /food-logs?limit=50
+
+# Returns all meals from last 7 days sorted by date descending
 ```
 
 ## ⚠️ Common Issues & Solutions
