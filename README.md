@@ -127,12 +127,14 @@ POST /register
 **Response Success (201):**
 ```json
 {
-  "status": "success",
+  "status": 201,
   "message": "User registered successfully",
-  "data": {
-    "id": 1,
-    "email": "john@example.com",
-    "name": "John Doe"
+  "response": {
+    "payload": {
+      "id": 1,
+      "email": "john@example.com",
+      "name": "John Doe"
+    }
   }
 }
 ```
@@ -154,15 +156,17 @@ POST /login
 **Response Success (200):**
 ```json
 {
-  "status": "success",
+  "status": 200,
   "message": "Login successful",
-  "data": {
-    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": 1,
-      "email": "john@example.com",
-      "name": "John Doe"
+  "response": {
+    "payload": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": 1,
+        "email": "john@example.com",
+        "name": "John Doe"
+      }
     }
   }
 }
@@ -184,8 +188,13 @@ POST /token
 **Response Success (200):**
 ```json
 {
-  "status": "success",
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "status": 200,
+  "message": "Token refreshed successfully",
+  "response": {
+    "payload": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+  }
 }
 ```
 
@@ -203,8 +212,11 @@ Authorization: Bearer <access_token>
 **Response Success (200):**
 ```json
 {
-  "status": "success",
-  "message": "Logged out successfully"
+  "status": 200,
+  "message": "Logged out successfully",
+  "response": {
+    "payload": null
+  }
 }
 ```
 
@@ -238,20 +250,22 @@ Authorization: Bearer <access_token>
 **Response Success (200):**
 ```json
 {
-  "status": "success",
+  "status": 200,
   "message": "Onboarding completed successfully",
-  "data": {
-    "id": 1,
-    "email": "john@example.com",
-    "name": "John Doe",
-    "gender": "Male",
-    "birthDate": "1990-01-01T00:00:00.000Z",
-    "height": 170.5,
-    "weight": 70.0,
-    "mainGoal": "Weight Loss",
-    "weightGoal": 65.0,
-    "activityLevel": "Moderate",
-    "allergies": ["Peanuts", "Shellfish"]
+  "response": {
+    "payload": {
+      "id": 1,
+      "email": "john@example.com",
+      "name": "John Doe",
+      "gender": "Male",
+      "birthDate": "1990-01-01T00:00:00.000Z",
+      "height": 170.5,
+      "weight": 70.0,
+      "mainGoal": "Weight Loss",
+      "weightGoal": 65.0,
+      "activityLevel": "Moderate",
+      "allergies": ["Peanuts", "Shellfish"]
+    }
   }
 }
 ```
@@ -272,19 +286,319 @@ Authorization: Bearer <access_token>
 **Response Success (200):**
 ```json
 {
-  "status": "success",
-  "data": {
-    "id": 1,
-    "email": "john@example.com",
-    "name": "John Doe",
-    "gender": "Male",
-    "birthDate": "1990-01-01T00:00:00.000Z",
-    "height": 170.5,
-    "weight": 70.0,
-    "mainGoal": "Weight Loss",
-    "weightGoal": 65.0,
-    "activityLevel": "Moderate",
-    "allergies": ["Peanuts", "Shellfish"]
+  "status": 200,
+  "message": "User profile retrieved successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "email": "john@example.com",
+      "name": "John Doe",
+      "gender": "Male",
+      "birthDate": "1990-01-01T00:00:00.000Z",
+      "height": 170.5,
+      "weight": 70.0,
+      "mainGoal": "Weight Loss",
+      "weightGoal": 65.0,
+      "activityLevel": "Moderate",
+      "allergies": ["Peanuts", "Shellfish"]
+    }
+  }
+}
+```
+
+#### 4. Food Management
+
+##### Get All Foods
+
+```http
+GET /foods
+```
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Foods retrieved successfully",
+  "response": {
+    "payload": [
+      {
+        "id": 1,
+        "name": "Pizza Margherita",
+        "description": "Pizza klasik dengan keju mozzarella",
+        "imageUrl": "https://example.com/pizza.jpg",
+        "prepTime": 70,
+        "cookTime": 15,
+        "servings": 4,
+        "steps": [
+          {
+            "title": "Siapkan Adonan",
+            "substeps": [
+              "Campur tepung, ragi, gula, dan garam.",
+              "Tambahkan air hangat dan minyak.",
+              "Uleni hingga kalis (±10 menit).",
+              "Diamkan 1 jam sampai mengembang 2×."
+            ]
+          },
+          {
+            "title": "Bentuk Kulit Pizza",
+            "substeps": [
+              "Pipihkan adonan di loyang (diameter ±25 cm).",
+              "Tusuk-tusuk ringan permukaan dengan garpu."
+            ]
+          }
+        ],
+        "nutritionFacts": [
+          {"name": "Kalori", "value": "285 kkal"},
+          {"name": "Protein", "value": "12 g"},
+          {"name": "Lemak", "value": "10 g"},
+          {"name": "Karbohidrat", "value": "36 g"}
+        ],
+        "ingredients": [
+          {"name": "Tepung Terigu", "quantity": "250 g"},
+          {"name": "Ragi Instan", "quantity": "7 g"},
+          {"name": "Keju Mozzarella", "quantity": "150 g"}
+        ],
+        "createdAt": "2025-11-26T00:00:00.000Z",
+        "updatedAt": "2025-11-26T00:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+##### Get Food by ID
+
+```http
+GET /foods/:id
+```
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food retrieved successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "name": "Pizza Margherita",
+      "description": "Pizza klasik dengan keju mozzarella",
+      "imageUrl": "https://example.com/pizza.jpg",
+      "prepTime": 70,
+      "cookTime": 15,
+      "servings": 4,
+      "steps": [
+        {
+          "title": "Siapkan Adonan",
+          "substeps": [
+            "Campur tepung, ragi, gula, dan garam.",
+            "Tambahkan air hangat dan minyak."
+          ]
+        }
+      ],
+      "nutritionFacts": [
+        {"name": "Kalori", "value": "285 kkal"},
+        {"name": "Protein", "value": "12 g"}
+      ],
+      "ingredients": [
+        {"name": "Tepung Terigu", "quantity": "250 g"},
+        {"name": "Ragi Instan", "quantity": "7 g"}
+      ],
+      "createdAt": "2025-11-26T00:00:00.000Z",
+      "updatedAt": "2025-11-26T00:00:00.000Z"
+    }
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Food not found",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+##### Create Food
+
+```http
+POST /foods
+```
+
+**Request Body:**
+```json
+{
+  "name": "Pizza Margherita",
+  "description": "Pizza klasik dengan keju mozzarella",
+  "imageUrl": "https://example.com/pizza.jpg",
+  "prepTime": 70,
+  "cookTime": 15,
+  "servings": 4,
+  "steps": [
+    {
+      "title": "Siapkan Adonan",
+      "substeps": [
+        "Campur tepung, ragi, gula, dan garam.",
+        "Tambahkan air hangat dan minyak.",
+        "Uleni hingga kalis (±10 menit).",
+        "Diamkan 1 jam sampai mengembang 2×."
+      ]
+    },
+    {
+      "title": "Bentuk Kulit Pizza",
+      "substeps": [
+        "Pipihkan adonan di loyang (diameter ±25 cm).",
+        "Tusuk-tusuk ringan permukaan dengan garpu."
+      ]
+    }
+  ],
+  "nutritionFacts": [
+    {"name": "Kalori", "value": "285 kkal"},
+    {"name": "Protein", "value": "12 g"},
+    {"name": "Lemak", "value": "10 g"},
+    {"name": "Karbohidrat", "value": "36 g"},
+    {"name": "Serat", "value": "2 g"},
+    {"name": "Gula", "value": "4 g"}
+  ],
+  "ingredients": [
+    {"name": "Tepung Terigu", "quantity": "250 g"},
+    {"name": "Ragi Instan", "quantity": "7 g"},
+    {"name": "Gula Pasir", "quantity": "1 sdt"},
+    {"name": "Garam", "quantity": "1/2 sdt"},
+    {"name": "Air Hangat", "quantity": "150 ml"},
+    {"name": "Minyak Zaitun", "quantity": "2 sdm"},
+    {"name": "Saus Tomat", "quantity": "100 g"},
+    {"name": "Keju Mozzarella", "quantity": "150 g"},
+    {"name": "Oregano/Basil Kering", "quantity": "secukupnya"}
+  ]
+}
+```
+
+**Response Success (201):**
+```json
+{
+  "status": 201,
+  "message": "Food created successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "name": "Pizza Margherita",
+      "description": "Pizza klasik dengan keju mozzarella",
+      "imageUrl": "https://example.com/pizza.jpg",
+      "prepTime": 70,
+      "cookTime": 15,
+      "servings": 4,
+      "steps": [...],
+      "nutritionFacts": [...],
+      "ingredients": [...],
+      "createdAt": "2025-11-26T00:00:00.000Z",
+      "updatedAt": "2025-11-26T00:00:00.000Z"
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Name is required",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+##### Update Food
+
+```http
+PUT /foods/:id
+```
+
+**Request Body:**
+```json
+{
+  "name": "Pizza Margherita Special",
+  "description": "Pizza klasik dengan keju mozzarella premium",
+  "prepTime": 60,
+  "steps": [
+    {
+      "title": "Siapkan Adonan",
+      "substeps": [
+        "Campur tepung, ragi, gula, dan garam.",
+        "Tambahkan air hangat dan minyak."
+      ]
+    }
+  ],
+  "nutritionFacts": [
+    {"name": "Kalori", "value": "300 kkal"},
+    {"name": "Protein", "value": "15 g"}
+  ],
+  "ingredients": [
+    {"name": "Tepung Terigu Premium", "quantity": "300 g"},
+    {"name": "Keju Mozzarella Premium", "quantity": "200 g"}
+  ]
+}
+```
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food updated successfully",
+  "response": {
+    "payload": {
+      "id": 1,
+      "name": "Pizza Margherita Special",
+      "description": "Pizza klasik dengan keju mozzarella premium",
+      "prepTime": 60,
+      "steps": [...],
+      "nutritionFacts": [...],
+      "ingredients": [...],
+      "createdAt": "2025-11-26T00:00:00.000Z",
+      "updatedAt": "2025-11-26T02:00:00.000Z"
+    }
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Food not found",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+##### Delete Food
+
+```http
+DELETE /foods/:id
+```
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Food deleted successfully",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Food not found",
+  "response": {
+    "payload": null
   }
 }
 ```
@@ -329,6 +643,66 @@ Authorization: Bearer <your_access_token>
 | createdAt | DateTime | Waktu pembuatan |
 | updatedAt | DateTime | Waktu update terakhir |
 
+### Food Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| name | String | Nama makanan |
+| description | String | Deskripsi makanan |
+| imageUrl | String | URL gambar makanan |
+| prepTime | Int | Waktu persiapan (menit) |
+| cookTime | Int | Waktu memasak (menit) |
+| servings | Int | Jumlah porsi |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
+### Step Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| title | String | Judul langkah |
+| order | Int | Urutan langkah |
+| foodId | Int | Foreign key ke Food |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
+### Substep Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| description | String | Deskripsi sub-langkah |
+| order | Int | Urutan sub-langkah |
+| stepId | Int | Foreign key ke Step |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
+### NutritionFact Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| name | String | Nama nutrisi (contoh: Kalori, Protein) |
+| value | String | Nilai nutrisi (contoh: 285 kkal, 12 g) |
+| order | Int | Urutan tampilan |
+| foodId | Int | Foreign key ke Food |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
+### Ingredient Table
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| name | String | Nama bahan |
+| quantity | String | Jumlah bahan (contoh: 250 g, 1 sdt) |
+| order | Int | Urutan tampilan |
+| foodId | Int | Foreign key ke Food |
+| createdAt | DateTime | Waktu pembuatan |
+| updatedAt | DateTime | Waktu update terakhir |
+
 ## 🔧 Database Management
 
 ### Membuka Prisma Studio
@@ -369,7 +743,8 @@ dietin-backend/
 │   │   ├── loginController.js
 │   │   ├── registerController.js
 │   │   ├── onboardController.js
-│   │   └── userController.js
+│   │   ├── userController.js
+│   │   └── foodController.js
 │   ├── middleware/            # Middleware functions
 │   │   └── authorization.js
 │   ├── model/                 # Data models
@@ -378,7 +753,8 @@ dietin-backend/
 │   │   ├── loginRoute.js
 │   │   ├── registerRoute.js
 │   │   ├── onboardRoute.js
-│   │   └── userRoute.js
+│   │   ├── userRoute.js
+│   │   └── foodRoute.js
 │   ├── index.js               # Application entry point
 │   └── responseScheme.js      # Response formatter
 ├── .env                       # Environment variables
@@ -419,6 +795,52 @@ curl -X POST http://localhost:3000/login \
 # Get User Profile
 curl -X GET http://localhost:3000/user \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get All Foods
+curl -X GET http://localhost:3000/foods
+
+# Get Food by ID
+curl -X GET http://localhost:3000/foods/1
+
+# Create Food
+curl -X POST http://localhost:3000/foods \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Pizza Margherita",
+    "description": "Pizza klasik dengan keju mozzarella",
+    "imageUrl": "https://example.com/pizza.jpg",
+    "prepTime": 70,
+    "cookTime": 15,
+    "servings": 4,
+    "steps": [
+      {
+        "title": "Siapkan Adonan",
+        "substeps": [
+          "Campur tepung, ragi, gula, dan garam.",
+          "Tambahkan air hangat dan minyak."
+        ]
+      }
+    ],
+    "nutritionFacts": [
+      {"name": "Kalori", "value": "285 kkal"},
+      {"name": "Protein", "value": "12 g"}
+    ],
+    "ingredients": [
+      {"name": "Tepung Terigu", "quantity": "250 g"},
+      {"name": "Ragi Instan", "quantity": "7 g"}
+    ]
+  }'
+
+# Update Food
+curl -X PUT http://localhost:3000/foods/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Pizza Margherita Special",
+    "prepTime": 60
+  }'
+
+# Delete Food
+curl -X DELETE http://localhost:3000/foods/1
 ```
 
 ## ⚠️ Common Issues & Solutions
