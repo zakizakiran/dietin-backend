@@ -7,6 +7,7 @@ import loginRoute from './routes/loginRoute.js';
 import onboardRoute from './routes/onboardRoute.js';
 import userRoute from './routes/userRoute.js';
 import foodRoute from './routes/foodRoute.js';
+import foodLogRoute from './routes/foodLogRoute.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/login', loginRoute);
 app.use('/onboard', onboardRoute);
 app.use('/user', authorizeToken, userRoute);
 app.use('/foods', foodRoute);
+app.use('/food-logs', authorizeToken, foodLogRoute);
 app.delete('/logout', async (req, res) => {
     await logoutHandler(req, res);
 });

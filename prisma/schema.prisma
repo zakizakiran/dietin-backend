@@ -4,11 +4,19 @@ generator client {
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 enum Gender {
   Male
   Female
+}
+
+enum MealType {
+  Breakfast
+  Lunch
+  Dinner
+  Snack
 }
 
 model User {
@@ -24,6 +32,7 @@ model User {
   weightGoal    Float?
   activityLevel String?
   allergies     Allergy[]
+  foodLogs      FoodLog[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   refreshToken  String?   @db.VarChar(255)
@@ -52,8 +61,37 @@ model Food {
   steps          Step[]
   nutritionFacts NutritionFact[]
   ingredients    Ingredient[]
+  foodLogItems   FoodLogItem[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+}
+
+model FoodLog {
+  id           Int           @id @default(autoincrement())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  date         DateTime      @default(now()) // tanggal konsumsi
+  mealType     MealType // Breakfast, Lunch, Dinner, Snack
+  foodLogItems FoodLogItem[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([date])
+}
+
+model FoodLogItem {
+  id        Int      @id @default(autoincrement())
+  foodLog   FoodLog  @relation(fields: [foodLogId], references: [id], onDelete: Cascade)
+  foodLogId Int
+  food      Food     @relation(fields: [foodId], references: [id])
+  foodId    Int
+  servings  Float    @default(1) // jumlah porsi yang dikonsumsi
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([foodLogId])
+  @@index([foodId])
 }
 
 model Step {
