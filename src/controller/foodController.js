@@ -32,6 +32,7 @@ export const getAllFoods = async (req, res) => {
             prepTime: food.prepTime,
             cookTime: food.cookTime,
             servings: food.servings,
+            servingType: food.servingType,
             steps: food.steps.map(step => ({
                 title: step.title,
                 substeps: step.substeps.map(substep => substep.description)
@@ -143,6 +144,7 @@ export const createFood = async (req, res) => {
             prepTime,
             cookTime,
             servings,
+            servingType,
             steps,
             nutritionFacts,
             ingredients
@@ -186,6 +188,7 @@ export const createFood = async (req, res) => {
                 prepTime,
                 cookTime,
                 servings,
+                servingType,
                 steps: {
                     create: steps.map((step, stepIndex) => ({
                         title: step.title,
@@ -240,6 +243,7 @@ export const createFood = async (req, res) => {
             prepTime: food.prepTime,
             cookTime: food.cookTime,
             servings: food.servings,
+            servingType: food.servingType,
             steps: food.steps.map(step => ({
                 title: step.title,
                 substeps: step.substeps.map(substep => substep.description)
@@ -282,6 +286,7 @@ export const updateFood = async (req, res) => {
             prepTime,
             cookTime,
             servings,
+            servingType,
             steps,
             nutritionFacts,
             ingredients
@@ -335,6 +340,7 @@ export const updateFood = async (req, res) => {
                 ...(prepTime !== undefined && { prepTime }),
                 ...(cookTime !== undefined && { cookTime }),
                 ...(servings !== undefined && { servings }),
+                ...(servingType !== undefined && { servingType }),
                 ...(steps && {
                     steps: {
                         create: steps.map((step, stepIndex) => ({
@@ -386,7 +392,6 @@ export const updateFood = async (req, res) => {
             }
         });
 
-        // Format response sesuai struktur frontend
         const formattedFood = {
             id: food.id,
             name: food.name,
@@ -395,6 +400,7 @@ export const updateFood = async (req, res) => {
             prepTime: food.prepTime,
             cookTime: food.cookTime,
             servings: food.servings,
+            servingType: food.servingType,
             steps: food.steps.map(step => ({
                 title: step.title,
                 substeps: step.substeps.map(substep => substep.description)
@@ -426,12 +432,10 @@ export const updateFood = async (req, res) => {
     }
 };
 
-// Delete food
 export const deleteFood = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Check if food exists
         const existingFood = await prisma.food.findUnique({
             where: { id: parseInt(id) }
         });
@@ -443,7 +447,6 @@ export const deleteFood = async (req, res) => {
             });
         }
 
-        // Delete food (cascade will delete related data)
         await prisma.food.delete({
             where: { id: parseInt(id) }
         });
