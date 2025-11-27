@@ -30,7 +30,7 @@ const findUserWithAllergies = async (email) => {
     return await prisma.user.findUnique({
         where: { email: email },
         include: {
-            allergies: true  // ✅ Include relasi allergies
+            allergies: true
         }
     });
 };

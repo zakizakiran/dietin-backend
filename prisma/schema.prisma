@@ -58,6 +58,7 @@ model Food {
   prepTime       Int? // waktu persiapan dalam menit
   cookTime       Int? // waktu memasak dalam menit
   servings       Int? // jumlah porsi
+  servingType    String?         @default("porsi") // satuan standar Indonesia: gram, mililiter, porsi, sendok, dll
   steps          Step[]
   nutritionFacts NutritionFact[]
   ingredients    Ingredient[]

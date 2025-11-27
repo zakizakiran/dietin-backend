@@ -8,6 +8,8 @@ Backend API untuk aplikasi Dietin - aplikasi manajemen diet dan kesehatan.
 - 👤 **User Management** - User registration, login, profile management
 - 📋 **Onboarding System** - Complete user health profile setup
 - 🍕 **Food Database** - Comprehensive food database dengan nutrition facts, ingredients, dan cooking steps
+- 🤖 **AI Food Scanner** - Scan makanan dengan AI (Groq LLM) untuk analisis nutrisi otomatis
+- 📸 **Image Upload** - Upload gambar makanan ke Cloudinary
 - 📊 **Food Logging** - Track makanan yang dikonsumsi per waktu makan (Breakfast, Lunch, Dinner, Snack)
 - 🔄 **Multi-food Support** - Log multiple foods dalam satu waktu makan
 - 📈 **Nutrition Tracking** - Automatic nutrition calculation dari foods yang di-log
@@ -61,11 +63,21 @@ PORT=3000
 # JWT Configuration
 ACCESS_TOKEN_SECRET=your_access_token_secret_key_here
 REFRESH_TOKEN_SECRET=your_refresh_token_secret_key_here
+
+# Groq AI Configuration (for Food Scanning)
+GROQ_API_KEY=your_groq_api_key_here
+
+# Cloudinary Configuration (for Image Upload)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 **Catatan**: 
 - Ganti `username` dan `password` dengan kredensial MySQL Anda
 - Ganti `your_access_token_secret_key_here` dan `your_refresh_token_secret_key_here` dengan secret key yang aman
+- Dapatkan Groq API key dari [https://console.groq.com/](https://console.groq.com/)
+- Dapatkan Cloudinary credentials dari [https://cloudinary.com/](https://cloudinary.com/)
 
 ### 4. Setup Database
 
@@ -526,6 +538,7 @@ POST /foods
   "prepTime": 70,
   "cookTime": 15,
   "servings": 4,
+  "servingType": "porsi",
   "steps": [
     {
       "title": "Siapkan Adonan",
@@ -566,6 +579,9 @@ POST /foods
 }
 ```
 
+**Field Description:**
+- `servingType` (optional): Satuan porsi dalam bahasa Indonesia. Contoh: "porsi", "gram", "mililiter", "mangkok", "piring", "sendok". Default: "porsi"
+
 **Response Success (201):**
 ```json
 {
@@ -580,6 +596,7 @@ POST /foods
       "prepTime": 70,
       "cookTime": 15,
       "servings": 4,
+      "servingType": "porsi",
       "steps": [...],
       "nutritionFacts": [...],
       "ingredients": [...],
@@ -693,7 +710,230 @@ DELETE /foods/:id
 }
 ```
 
-#### 5. Food Log Management
+#### 5. Food Scanning & AI Analysis
+
+##### Scan Food with AI
+
+Menganalisis gambar makanan menggunakan AI (Groq LLM) untuk mendapatkan informasi nutrisi lengkap.
+
+```http
+POST /food/scan
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+**Request Body (form-data):**
+- `image` (file): Gambar makanan (jpg, jpeg, png, gif, webp, max 5MB)
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Berhasil menganalisis gambar makanan",
+  "response": {
+    "payload": {
+      "name": "Nasi Goreng",
+      "description": "Nasi goreng khas Indonesia dengan bumbu spesial",
+      "imageUrl": "https://res.cloudinary.com/xxx/image.jpg",
+      "prepTime": 10,
+      "cookTime": 15,
+      "servings": 1,
+      "servingType": "porsi",
+      "steps": [
+        {
+          "title": "Persiapan Bahan",
+          "substeps": [
+            "Siapkan nasi putih dingin",
+            "Potong bawang merah dan bawang putih"
+          ]
+        }
+      ],
+      "nutritionFacts": [
+        {"name": "Kalori", "value": "285 kkal"},
+        {"name": "Protein", "value": "12 g"},
+        {"name": "Lemak", "value": "8 g"},
+        {"name": "Karbohidrat", "value": "40 g"}
+      ],
+      "ingredients": [
+        {"name": "Nasi putih", "quantity": "250 gram"},
+        {"name": "Bawang merah", "quantity": "3 siung"}
+      ]
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Gambar makanan wajib diupload",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Use Case:**
+- User upload foto makanan dari kamera/galeri
+- AI menganalisis dan memberikan informasi lengkap
+- User dapat review hasil sebelum menyimpan
+
+##### Scan and Log Food (Manual Input)
+
+Membuat food entry dari input manual dan langsung menambahkan ke food log user.
+
+```http
+POST /food/scan-and-log
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Nasi Goreng",
+  "description": "Nasi goreng khas Indonesia dengan bumbu spesial",
+  "imageUrl": "https://example.com/nasigoreng.jpg",
+  "prepTime": 10,
+  "cookTime": 15,
+  "servings": 1,
+  "servingType": "porsi",
+  "steps": [
+    {
+      "title": "Persiapan Bahan",
+      "substeps": [
+        "Siapkan nasi putih dingin",
+        "Potong bawang merah dan bawang putih",
+        "Iris cabai sesuai selera"
+      ]
+    },
+    {
+      "title": "Memasak",
+      "substeps": [
+        "Panaskan minyak di wajan",
+        "Tumis bumbu hingga harum",
+        "Masukkan nasi dan aduk rata",
+        "Tambahkan kecap dan garam"
+      ]
+    }
+  ],
+  "nutritionFacts": [
+    {"name": "Kalori", "value": "285 kkal"},
+    {"name": "Protein", "value": "12 g"},
+    {"name": "Lemak", "value": "8 g"},
+    {"name": "Karbohidrat", "value": "40 g"},
+    {"name": "Serat", "value": "2 g"}
+  ],
+  "ingredients": [
+    {"name": "Nasi putih", "quantity": "250 gram"},
+    {"name": "Bawang merah", "quantity": "3 siung"},
+    {"name": "Bawang putih", "quantity": "2 siung"},
+    {"name": "Cabai merah", "quantity": "2 buah"},
+    {"name": "Kecap manis", "quantity": "2 sendok makan"},
+    {"name": "Garam", "quantity": "1 sendok teh"}
+  ],
+  "mealType": "Lunch",
+  "date": "2025-11-27",
+  "servingsConsumed": 1
+}
+```
+
+**Field Description:**
+- `name` (required): Nama makanan
+- `description` (optional): Deskripsi makanan
+- `imageUrl` (optional): URL gambar makanan
+- `prepTime` (optional): Waktu persiapan dalam menit
+- `cookTime` (optional): Waktu memasak dalam menit
+- `servings` (optional): Jumlah porsi yang dihasilkan
+- `servingType` (optional): Satuan porsi (porsi, gram, mililiter, dll)
+- `steps` (required): Array langkah-langkah memasak
+- `nutritionFacts` (required): Array informasi nutrisi
+- `ingredients` (required): Array bahan-bahan
+- `mealType` (required): Waktu makan (Breakfast, Lunch, Dinner, Snack)
+- `date` (optional): Tanggal konsumsi (YYYY-MM-DD), default: hari ini
+- `servingsConsumed` (optional): Jumlah porsi yang dikonsumsi, default: 1
+
+**Response Success (201):**
+```json
+{
+  "status": 201,
+  "message": "Food created and added to food log successfully",
+  "response": {
+    "payload": {
+      "food": {
+        "id": 5,
+        "name": "Nasi Goreng",
+        "description": "Nasi goreng khas Indonesia dengan bumbu spesial",
+        "imageUrl": "https://example.com/nasigoreng.jpg",
+        "prepTime": 10,
+        "cookTime": 15,
+        "servings": 1,
+        "servingType": "porsi",
+        "steps": [
+          {
+            "title": "Persiapan Bahan",
+            "substeps": ["Siapkan nasi putih dingin", "..."]
+          }
+        ],
+        "nutritionFacts": [
+          {"name": "Kalori", "value": "285 kkal"},
+          {"name": "Protein", "value": "12 g"}
+        ],
+        "ingredients": [
+          {"name": "Nasi putih", "quantity": "250 gram"}
+        ],
+        "createdAt": "2025-11-27T00:00:00.000Z",
+        "updatedAt": "2025-11-27T00:00:00.000Z"
+      },
+      "foodLog": {
+        "id": 10,
+        "date": "2025-11-27T00:00:00.000Z",
+        "mealType": "Lunch",
+        "servings": 1,
+        "nutritionFacts": [
+          {"name": "Kalori", "value": "285 kkal"},
+          {"name": "Protein", "value": "12 g"}
+        ]
+      }
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Name is required",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Use Case:**
+- User mendapat data makanan dari hasil scan AI (`/food/scan`)
+- User langsung menyimpan dan log makanan dalam 1 request
+- Otomatis membuat entry di tabel Food dan FoodLog
+- Cocok untuk workflow: scan → review → save & log
+
+**Workflow Example:**
+1. User scan makanan: `POST /food/scan` (upload gambar)
+2. User review hasil AI
+3. User edit jika perlu (frontend)
+4. User save & log: `POST /food/scan-and-log` (kirim JSON hasil review)
+5. Makanan tersimpan dan langsung masuk ke food log hari ini
+
+#### 6. Food Log Management
 
 ##### Add Food Log
 
@@ -1339,5 +1579,9 @@ npx prisma generate
 | PORT | Server port | 3000 |
 | ACCESS_TOKEN_SECRET | Secret key untuk access token | your_secret_key_here |
 | REFRESH_TOKEN_SECRET | Secret key untuk refresh token | your_refresh_secret_here |
+| GROQ_API_KEY | Groq AI API key untuk food scanning | gsk_xxx... |
+| CLOUDINARY_CLOUD_NAME | Cloudinary cloud name | your_cloud_name |
+| CLOUDINARY_API_KEY | Cloudinary API key | 123456789012345 |
+| CLOUDINARY_API_SECRET | Cloudinary API secret | your_api_secret |
 
 **Happy Coding! 🚀**
