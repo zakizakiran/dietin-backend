@@ -667,7 +667,6 @@ export const searchFoodByUPC = async (req, res) => {
             });
         }
 
-        // Fetch data from Open Food Facts API
         const openFoodFactsUrl = `https://world.openfoodfacts.org/api/v2/product/${upc}.json`;
 
         let productData;
@@ -690,26 +689,17 @@ export const searchFoodByUPC = async (req, res) => {
             });
         }
 
-        // Extract product information
         const name = productData.product_name || productData.product_name_id || 'Produk Tidak Dikenal';
         let description = productData.generic_name || `Produk dengan kode ${upc}`;
         const imageUrl = productData.image_url || productData.image_front_url || '';
         const categories = productData.categories || '';
 
-        // Determine if this product needs cooking steps
         const needsCooking = needsCookingSteps(categories, name);
 
-        // Convert nutrients to our format
         const nutritionFacts = convertNutrients(productData.nutriments || {});
 
-        // Extract ingredients - Don't use Open Food Facts ingredients data (often OCR garbage)
-        // Instead, always use LLM to generate ingredients based on product knowledge
         let ingredients = [];
 
-        // Don't extract ingredients from API data - it's unreliable OCR text
-        // Let LLM generate proper ingredients based on product name and category
-
-        // Always use LLM to generate ingredients and steps based on product name
         let steps = [];
         console.log('Using LLM to generate product information based on product name...');
 
@@ -717,20 +707,16 @@ export const searchFoodByUPC = async (req, res) => {
         console.log('LLM completion result:', llmCompletion);
 
         if (llmCompletion && llmCompletion.ingredients && Array.isArray(llmCompletion.ingredients) && llmCompletion.ingredients.length > 0) {
-            // Use LLM-generated ingredients
             ingredients = llmCompletion.ingredients;
             console.log('Successfully got ingredients from LLM:', ingredients.length, 'items');
 
-            // Update description if provided
             if (llmCompletion.description && llmCompletion.description.trim()) {
                 description = llmCompletion.description;
             }
 
-            // Use LLM-generated steps if available and needed
             if (needsCooking && llmCompletion.steps && Array.isArray(llmCompletion.steps) && llmCompletion.steps.length > 0) {
                 steps = llmCompletion.steps;
             } else if (needsCooking) {
-                // Fallback to default steps if LLM didn't provide them but cooking is needed
                 steps = [
                     {
                         title: "Siapkan Bahan",
@@ -751,7 +737,6 @@ export const searchFoodByUPC = async (req, res) => {
 
             console.log('LLM completion successful with', ingredients.length, 'ingredients');
         } else {
-            // This should not happen with improved fallback, but keep as safety net
             console.error('Critical error: Could not generate ingredients even with fallback');
             ingredients = [{
                 name: 'Bahan utama produk',
@@ -759,11 +744,9 @@ export const searchFoodByUPC = async (req, res) => {
             }];
         }
 
-        // Determine serving information
         const servings = productData.quantity ? 1 : 1;
         const servingType = productData.serving_size ? 'gram' : 'porsi';
 
-        // Estimate prep and cook time
         const prepTime = needsCooking ? 5 : 0;
         const cookTime = needsCooking ? 10 : 0;
 
@@ -819,7 +802,6 @@ export const scanAndLogFoodByUPC = async (req, res) => {
             });
         }
 
-        // Fetch data from Open Food Facts API first
         const openFoodFactsUrl = `https://world.openfoodfacts.org/api/v2/product/${upc}.json`;
 
         let productData;
@@ -842,26 +824,17 @@ export const scanAndLogFoodByUPC = async (req, res) => {
             });
         }
 
-        // Extract product information
         let name = productData.product_name || productData.product_name_id || 'Produk Tidak Dikenal';
         let description = productData.generic_name || `Produk dengan kode ${upc}`;
         const imageUrl = productData.image_url || productData.image_front_url || '';
         const categories = productData.categories || '';
 
-        // Determine if this product needs cooking steps
         const needsCooking = needsCookingSteps(categories, name);
 
-        // Convert nutrients to our format
         const nutritionFacts = convertNutrients(productData.nutriments || {});
 
-        // Extract ingredients - Don't use Open Food Facts ingredients data (often OCR garbage)
-        // Instead, always use LLM to generate ingredients based on product knowledge
         let ingredients = [];
 
-        // Don't extract ingredients from API data - it's unreliable OCR text
-        // Let LLM generate proper ingredients based on product name and category
-
-        // Use LLM completion to generate ingredients and steps
         let steps = [];
         console.log('Using LLM to complete product information...');
 
@@ -869,20 +842,16 @@ export const scanAndLogFoodByUPC = async (req, res) => {
         console.log('LLM completion result:', llmCompletion);
 
         if (llmCompletion && llmCompletion.ingredients && Array.isArray(llmCompletion.ingredients) && llmCompletion.ingredients.length > 0) {
-            // Use LLM-generated ingredients
             ingredients = llmCompletion.ingredients;
             console.log('Successfully got ingredients from LLM:', ingredients.length, 'items');
 
-            // Update description if provided
             if (llmCompletion.description && llmCompletion.description.trim()) {
                 description = llmCompletion.description;
             }
 
-            // Use LLM-generated steps if available and needed
             if (needsCooking && llmCompletion.steps && Array.isArray(llmCompletion.steps) && llmCompletion.steps.length > 0) {
                 steps = llmCompletion.steps;
             } else if (needsCooking) {
-                // Fallback to default steps if LLM didn't provide them but cooking is needed
                 steps = [
                     {
                         title: "Siapkan Bahan",
@@ -903,7 +872,6 @@ export const scanAndLogFoodByUPC = async (req, res) => {
 
             console.log('LLM completion successful with', ingredients.length, 'ingredients');
         } else {
-            // This should not happen with improved fallback, but keep as safety net
             console.error('Critical error: Could not generate ingredients even with fallback');
             ingredients = [{
                 name: 'Bahan utama produk',
@@ -929,17 +897,13 @@ export const scanAndLogFoodByUPC = async (req, res) => {
                 ];
             }
         }
-        // For ready-to-eat products, steps will remain empty array
 
-        // Determine serving information
         const servings = productData.quantity ? 1 : 1;
         const servingType = productData.serving_size ? 'gram' : 'porsi';
 
-        // Estimate prep and cook time
         const prepTime = needsCooking ? 5 : 0;
         const cookTime = needsCooking ? 10 : 0;
 
-        // Create food entry in database
         let createdFood;
         try {
             createdFood = await prisma.food.create({
@@ -1007,7 +971,6 @@ export const scanAndLogFoodByUPC = async (req, res) => {
             });
         }
 
-        // Create food log entry
         let foodLog;
         try {
             foodLog = await prisma.foodLog.create({
