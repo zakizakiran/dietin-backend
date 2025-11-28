@@ -143,6 +143,10 @@ http://localhost:3000
 | | `/food-logs/date` | GET | ✅ | Get food logs by date |
 | | `/food-logs` | GET | ✅ | Get all food logs |
 | | `/food-logs/:id` | DELETE | ✅ | Delete food log |
+| **Food Scan (AI)** | `/food/scan` | POST | ✅ | Scan food with AI vision |
+| | `/food/scan-and-log` | POST | ✅ | Scan and log food directly |
+| **UPC Scanning** | `/food/upc/:upc` | GET | ✅ | Search food by UPC barcode |
+| | `/food/upc/:upc/log` | POST | ✅ | Scan UPC and log food |
 
 ### Endpoints
 
@@ -933,6 +937,252 @@ Content-Type: application/json
 4. User save & log: `POST /food/scan-and-log` (kirim JSON hasil review)
 5. Makanan tersimpan dan langsung masuk ke food log hari ini
 
+#### 7. UPC Barcode Scanning
+
+##### Search Food by UPC
+
+Mencari informasi produk makanan menggunakan kode UPC/barcode. Sistem akan:
+1. Query produk dari Open Food Facts API
+2. Generate ingredients menggunakan AI (Groq LLM) berdasarkan nama produk dan kategori
+3. Memberikan informasi nutrisi lengkap
+
+```http
+GET /food/upc/:upc
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+```
+
+**Path Parameters:**
+- `upc` (required): Kode UPC/barcode produk (minimal 8 digit)
+
+**Response Success (200):**
+```json
+{
+  "status": 200,
+  "message": "Berhasil menemukan informasi produk",
+  "response": {
+    "payload": {
+      "name": "Indomie Goreng Original",
+      "description": "Mi instan siap seduh dengan bumbu pelengkap",
+      "imageUrl": "https://world.openfoodfacts.org/images/products/899/276/022/1509/front_id.jpg",
+      "prepTime": 5,
+      "cookTime": 10,
+      "servings": 1,
+      "servingType": "gram",
+      "upcCode": "8992760221509",
+      "brand": "Indomie",
+      "categories": "instant noodles, noodles",
+      "steps": [
+        {
+          "title": "Persiapan",
+          "substeps": [
+            "Siapkan 400ml air mendidih",
+            "Buka kemasan mi dan bumbu"
+          ]
+        },
+        {
+          "title": "Memasak",
+          "substeps": [
+            "Masukkan mi ke dalam air mendidih",
+            "Tambahkan bumbu dan aduk rata",
+            "Masak 3-4 menit hingga matang"
+          ]
+        }
+      ],
+      "nutritionFacts": [
+        {"name": "Kalori", "value": "390 kkal"},
+        {"name": "Protein", "value": "8.5 g"},
+        {"name": "Lemak", "value": "14 g"},
+        {"name": "Karbohidrat", "value": "58 g"},
+        {"name": "Serat", "value": "2.5 g"},
+        {"name": "Gula", "value": "3 g"}
+      ],
+      "ingredients": [
+        {"name": "Tepung terigu", "quantity": "300g"},
+        {"name": "Minyak kelapa sawit", "quantity": "75g"},
+        {"name": "Garam", "quantity": "25g"},
+        {"name": "Bumbu penyedap", "quantity": "15g"},
+        {"name": "Pengawet alami", "quantity": "2g"}
+      ]
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Kode UPC tidak valid. Harap masukkan kode UPC yang valid",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Produk dengan kode UPC tersebut tidak ditemukan",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Use Case:**
+- User scan barcode produk makanan kemasan
+- Mendapat informasi lengkap dari database produk internasional (Open Food Facts)
+- Ingredients di-generate oleh AI untuk akurasi yang lebih baik
+- User dapat review hasil sebelum menyimpan
+
+**Features:**
+- 🔍 **Akses database produk global** - 2M+ produk dari Open Food Facts
+- 🤖 **AI-Generated Ingredients** - LLM menghasilkan ingredients yang akurat berdasarkan kategori produk
+- 📊 **Informasi nutrisi lengkap** - Kalori, protein, lemak, karbohidrat, dll
+- 🍳 **Cooking steps** - Langkah memasak otomatis untuk produk yang perlu dimasak
+- 🔄 **Smart Fallback** - Sistem fallback cerdas jika LLM gagal
+
+**Supported Products:**
+- Mie instan & pasta
+- Biskuit & cookies
+- Minuman kemasan (susu, teh, jus)
+- Snack & makanan ringan
+- Produk makanan kemasan lainnya
+
+**Contoh UPC Code untuk Testing:**
+- `8992760221509` - Indomie Goreng
+- `089686098235` - Coca Cola
+- `8992696311015` - Chitato Snack
+- `8997878921607` - Biskuat Biskuit
+
+##### Scan and Log Food by UPC
+
+Mencari produk dengan UPC barcode dan langsung menambahkan ke food log user.
+
+```http
+POST /food/upc/:upc/log
+```
+
+**Headers:**
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Path Parameters:**
+- `upc` (required): Kode UPC/barcode produk (minimal 8 digit)
+
+**Request Body:**
+```json
+{
+  "mealType": "Lunch",
+  "date": "2025-11-28",
+  "servingsConsumed": 1
+}
+```
+
+**Field Description:**
+- `mealType` (required): Waktu makan (Breakfast, Lunch, Dinner, Snack)
+- `date` (optional): Tanggal konsumsi (YYYY-MM-DD), default: hari ini
+- `servingsConsumed` (optional): Jumlah porsi yang dikonsumsi, default: 1
+
+**Response Success (201):**
+```json
+{
+  "status": 201,
+  "message": "Food created and added to food log successfully from UPC",
+  "response": {
+    "payload": {
+      "food": {
+        "id": 15,
+        "name": "Indomie Goreng Original",
+        "description": "Mi instan siap seduh dengan bumbu pelengkap",
+        "imageUrl": "https://world.openfoodfacts.org/images/products/899/276/022/1509/front_id.jpg",
+        "prepTime": 5,
+        "cookTime": 10,
+        "servings": 1,
+        "servingType": "gram",
+        "upcCode": "8992760221509",
+        "steps": [
+          {
+            "title": "Persiapan",
+            "substeps": [
+              "Siapkan 400ml air mendidih",
+              "Buka kemasan mi dan bumbu"
+            ]
+          }
+        ],
+        "nutritionFacts": [
+          {"name": "Kalori", "value": "390 kkal"},
+          {"name": "Protein", "value": "8.5 g"}
+        ],
+        "ingredients": [
+          {"name": "Tepung terigu", "quantity": "300g"},
+          {"name": "Minyak kelapa sawit", "quantity": "75g"}
+        ]
+      },
+      "foodLog": {
+        "id": 25,
+        "date": "2025-11-28T00:00:00.000Z",
+        "mealType": "Lunch",
+        "servings": 1,
+        "nutritionFacts": [
+          {"name": "Kalori", "value": "390 kkal"},
+          {"name": "Protein", "value": "8.5 g"}
+        ]
+      }
+    }
+  }
+}
+```
+
+**Response Error (400):**
+```json
+{
+  "status": 400,
+  "message": "Kode UPC tidak valid. Harap masukkan kode UPC yang valid",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Response Error (404):**
+```json
+{
+  "status": 404,
+  "message": "Produk dengan kode UPC tersebut tidak ditemukan",
+  "response": {
+    "payload": null
+  }
+}
+```
+
+**Use Case:**
+- User scan barcode produk yang akan dimakan
+- Sistem otomatis mencari info produk dan membuat entry
+- Langsung tersimpan ke food log dengan waktu makan yang dipilih
+- Cocok untuk quick logging produk kemasan
+
+**Workflow Example:**
+1. User scan barcode: Frontend baca UPC code
+2. User pilih meal type (Breakfast/Lunch/Dinner/Snack)
+3. Hit endpoint: `POST /food/upc/8992760221509/log`
+4. Produk otomatis tersimpan dan masuk ke food log
+5. User dapat langsung track konsumsi kalori
+
+**Benefits:**
+- ⚡ **Quick logging** - Scan dan log dalam 1 request
+- 📦 **Perfect untuk produk kemasan** - Tidak perlu input manual
+- 🎯 **Accurate nutrition data** - Data dari database produk global
+- 🤖 **AI-powered** - Ingredients dan steps di-generate oleh AI
+- 💾 **Auto save** - Produk tersimpan untuk penggunaan di masa depan
+
 #### 6. Food Log Management
 
 ##### Add Food Log
@@ -1493,6 +1743,20 @@ curl -X GET "http://localhost:3000/food-logs?limit=30" \
 # Delete Food Log
 curl -X DELETE http://localhost:3000/food-logs/1 \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Search Food by UPC
+curl -X GET http://localhost:3000/food/upc/8992760221509 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Scan and Log Food by UPC
+curl -X POST http://localhost:3000/food/upc/8992760221509/log \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mealType": "Lunch",
+    "date": "2025-11-28",
+    "servingsConsumed": 1
+  }'
 ```
 
 ### Food Log Use Cases
