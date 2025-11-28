@@ -134,7 +134,6 @@ export const getFoodById = async (req, res) => {
     }
 };
 
-// Create new food
 export const createFood = async (req, res) => {
     try {
         const {
@@ -150,7 +149,6 @@ export const createFood = async (req, res) => {
             ingredients
         } = req.body;
 
-        // Validasi input
         if (!name) {
             return response(res, {
                 status: 400,
@@ -234,7 +232,6 @@ export const createFood = async (req, res) => {
             }
         });
 
-        // Format response sesuai struktur frontend
         const formattedFood = {
             id: food.id,
             name: food.name,
@@ -275,7 +272,6 @@ export const createFood = async (req, res) => {
     }
 };
 
-// Update food
 export const updateFood = async (req, res) => {
     try {
         const { id } = req.params;
@@ -292,7 +288,6 @@ export const updateFood = async (req, res) => {
             ingredients
         } = req.body;
 
-        // Check if food exists
         const existingFood = await prisma.food.findUnique({
             where: { id: parseInt(id) }
         });
@@ -304,7 +299,6 @@ export const updateFood = async (req, res) => {
             });
         }
 
-        // Delete existing related data if new data provided
         if (steps) {
             await prisma.substep.deleteMany({
                 where: {
@@ -330,7 +324,6 @@ export const updateFood = async (req, res) => {
             });
         }
 
-        // Update food dengan data baru
         const food = await prisma.food.update({
             where: { id: parseInt(id) },
             data: {

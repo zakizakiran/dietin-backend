@@ -14,7 +14,6 @@ const handleOnboard = async (req) => {
             activityLevel: activityLevel || null,
         });
 
-        // Handle allergies separately if provided
         let userAllergies = null;
         if (allergies && Array.isArray(allergies)) {
             userAllergies = await upsertAllergies(userId, allergies);
