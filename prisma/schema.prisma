@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 enum Gender {
@@ -59,6 +58,7 @@ model Food {
   cookTime       Int? // waktu memasak dalam menit
   servings       Int? // jumlah porsi
   servingType    String?         @default("porsi") // satuan standar Indonesia: gram, mililiter, porsi, sendok, dll
+  upcCode        String?         @unique // kode UPC untuk produk dari barcode
   steps          Step[]
   nutritionFacts NutritionFact[]
   ingredients    Ingredient[]

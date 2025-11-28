@@ -2,14 +2,14 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs'; // Import fs untuk cek folder
-import { scanFood, scanAndLogFood } from '../controller/foodScanController.js';
+import { scanFood, scanAndLogFood, searchFoodByUPC, scanAndLogFoodByUPC } from '../controller/foodScanController.js';
 import { authorizeToken } from '../middleware/authorization.js';
 
 const router = express.Router();
 
 // Pastikan folder uploads ada
 const uploadDir = 'uploads/';
-if (!fs.existsSync(uploadDir)){
+if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
@@ -33,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    
+
     // Validasi: Cek mimetype ATAU ekstensi (agar lebih fleksibel terhadap quirk client)
     // Idealnya cek keduanya, tapi octet-stream sering terjadi di mobile dev
     const isMimeTypeImage = allowedTypes.test(file.mimetype);
@@ -59,5 +59,9 @@ const upload = multer({
 router.post('/scan', authorizeToken, upload.single('image'), scanFood);
 
 router.post('/scan-and-log', authorizeToken, scanAndLogFood);
+
+router.get('/upc/:upc', authorizeToken, searchFoodByUPC);
+
+router.post('/upc/:upc/log', authorizeToken, scanAndLogFoodByUPC);
 
 export default router;
