@@ -1,10 +1,17 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs'; // Import fs untuk cek folder
 import { scanFood, scanAndLogFood } from '../controller/foodScanController.js';
 import { authorizeToken } from '../middleware/authorization.js';
 
 const router = express.Router();
+
+// Pastikan folder uploads ada
+const uploadDir = 'uploads/';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -17,14 +24,27 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
+    // --- DEBUG LOGGING ---
+    console.log('---------------------------------------');
+    console.log('[Multer] Menerima File Baru:');
+    console.log('Nama File Asli :', file.originalname);
+    console.log('Mimetype       :', file.mimetype);
+    console.log('---------------------------------------');
+
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    
+    // Validasi: Cek mimetype ATAU ekstensi (agar lebih fleksibel terhadap quirk client)
+    // Idealnya cek keduanya, tapi octet-stream sering terjadi di mobile dev
+    const isMimeTypeImage = allowedTypes.test(file.mimetype);
+    const isOctetStream = file.mimetype === 'application/octet-stream';
 
-    if (mimetype && extname) {
+    if ((isMimeTypeImage || isOctetStream) && extname) {
         return cb(null, true);
     } else {
-        cb(new Error('Hanya file gambar yang diperbolehkan (jpeg, jpg, png, gif, webp)'));
+        const errorMsg = `File ditolak! Mimetype: ${file.mimetype}, Ext: ${path.extname(file.originalname)}`;
+        console.error(errorMsg);
+        cb(new Error(`Hanya file gambar yang diperbolehkan. (${file.mimetype})`));
     }
 };
 
